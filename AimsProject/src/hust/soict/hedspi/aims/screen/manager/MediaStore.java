@@ -15,6 +15,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 
+import hust.soict.hedspi.aims.exception.PlayerException;
 import hust.soict.hedspi.aims.media.CompactDisc;
 import hust.soict.hedspi.aims.media.DigitalVideoDisc;
 import hust.soict.hedspi.aims.media.Media;
@@ -50,10 +51,20 @@ public class MediaStore extends JPanel {
                     
                     if (media instanceof CompactDisc) {
                         textArea.setText("Playing CD: " + media.getTitle() + "\n");
-                        ((CompactDisc) media).play();
+                        try {
+							((CompactDisc) media).play();
+						} catch (PlayerException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
                     } else if (media instanceof DigitalVideoDisc) {
                         textArea.setText("Playing DVD: " + media.getTitle() + "\n");
-                        ((DigitalVideoDisc) media).play();
+                        try {
+							((DigitalVideoDisc) media).play();
+						} catch (PlayerException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
                     }
                     
                     dialog.add(textArea);
