@@ -2,6 +2,8 @@ package hust.soict.hedspi.aims.media;
 
 import java.util.Comparator;
 
+import hust.soict.hedspi.aims.exception.PlayerException;
+
 public abstract class Media {
 	
 	public static final Comparator<Media> COMPARE_BY_TITLE_COST = new MediaComparatorByTitleCost();
@@ -61,7 +63,7 @@ public abstract class Media {
 		return this.getTitle().toLowerCase().contains(title.toLowerCase());
 	}
 	
-    public void play() {
+    public void play() throws PlayerException {
         System.out.println("Playing media");
     }
 	
@@ -78,4 +80,13 @@ public abstract class Media {
 	public String toString() {
 		return "Media: " + this.getTitle() + " - Category: " + this.getCategory() + " - Cost: " + this.getCost() + "$";
 	}
+	
+	public int compareTo(Media other) {
+        int titleComparison = this.getTitle().compareTo(other.getTitle());
+        if (titleComparison != 0) {
+            return titleComparison;
+        } else {
+            return Double.compare(this.getCost(), other.getCost());
+        }
+    }
 }

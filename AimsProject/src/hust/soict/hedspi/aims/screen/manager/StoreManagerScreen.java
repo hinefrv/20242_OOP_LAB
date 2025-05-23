@@ -25,6 +25,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
+import hust.soict.hedspi.aims.exception.PlayerException;
 import hust.soict.hedspi.aims.media.Book;
 import hust.soict.hedspi.aims.media.CompactDisc;
 import hust.soict.hedspi.aims.media.DigitalVideoDisc;
@@ -148,7 +149,14 @@ public class StoreManagerScreen extends JFrame{
         JPanel buttonPanel = new JPanel();
         if (media instanceof Playable) {
             JButton playButton = new JButton("Play");
-            playButton.addActionListener(e -> playMedia(media));
+            playButton.addActionListener(e -> {
+				try {
+					playMedia(media);
+				} catch (PlayerException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			});
             buttonPanel.add(playButton);
         }
         
@@ -168,7 +176,7 @@ public class StoreManagerScreen extends JFrame{
         return cell;
 	}
 	
-	private void playMedia(Media media) {
+	private void playMedia(Media media) throws PlayerException {
         JDialog playDialog = new JDialog(this, "Now Playing", true);
         playDialog.setSize(300, 200);
         playDialog.setLocationRelativeTo(this);

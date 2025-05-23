@@ -1,9 +1,13 @@
 package hust.soict.hedspi.aims;
 
 import hust.soict.hedspi.aims.cart.Cart;
+import hust.soict.hedspi.aims.exception.PlayerException;
+import hust.soict.hedspi.aims.media.Book;
 import hust.soict.hedspi.aims.media.CompactDisc;
+import hust.soict.hedspi.aims.media.DigitalVideoDisc;
 import hust.soict.hedspi.aims.media.Disc;
 import hust.soict.hedspi.aims.media.Media;
+import hust.soict.hedspi.aims.media.Track;
 import hust.soict.hedspi.aims.store.Store;
 import java.util.Scanner;
 
@@ -14,7 +18,7 @@ public class Aims {
 	private static Store store = new Store();
 	private static Cart cart = new Cart();
 	
-	public static void main(String[] args) throws LimitExceededException {
+	public static void main(String[] args) throws LimitExceededException, PlayerException {
 		
 		boolean emerge = false;
 		while (!emerge) {
@@ -58,7 +62,7 @@ public class Aims {
 		
 	}
 	
-	public static void storeMenu(Scanner scanner) throws LimitExceededException {
+	public static void storeMenu(Scanner scanner) throws LimitExceededException, PlayerException {
 		boolean back = false;
 		while(!back) {
 			
@@ -110,14 +114,38 @@ public class Aims {
 						}
 						Media media = store.search(title);
 						if (media != null) {
-							if (media instanceof Disc || media instanceof CompactDisc) {
-								media.play();
+							 try {
+	                                cart.addMedia(media);
+	                            } catch (LimitExceededException e) {
+	                                e.printStackTrace();
+	                            }
+	                            foundToAdd = true;
 							} else {
 								System.out.println("Media not found!");
-							}
 						}
 					}
 					break;
+				case 3:
+					boolean foundToPlay = false;
+                    while (!foundToPlay) {
+                        System.out.println("Enter the title of the media (type '#' to stop): ");
+                        String title = scanner.nextLine();
+                        if (title.equals("#")) {
+                            break;
+                        }
+                        Media media = store.search(title);
+                        if (media != null) {
+                            if (media instanceof Disc || media instanceof CompactDisc) {
+                                media.play();
+                            } else {
+                                System.out.println("This type of media is not supported!");
+                            }
+                            foundToPlay = true;
+                        } else {
+                            System.out.println("*Media not found!");
+                        }
+                    }
+                    break;
 				case 4:
 					cartMenu(scanner);
 					break;
@@ -129,7 +157,7 @@ public class Aims {
 		
 	}
 	
-	public static void mediaDetailsMenu(Scanner scanner, Media media) throws LimitExceededException {
+	public static void mediaDetailsMenu(Scanner scanner, Media media) throws LimitExceededException, PlayerException {
 		boolean back = false;
 		while (!back) {
 			
@@ -149,7 +177,11 @@ public class Aims {
 					back = true;
 					break;
 				case 1:
-					cart.addMedia(media);
+					try {
+						cart.addMedia(media);
+					} catch (LimitExceededException e) {
+						e.printStackTrace();
+					}
 					break;
 				case 2:
 					if (media instanceof Disc || media instanceof CompactDisc) {
@@ -166,7 +198,7 @@ public class Aims {
 		
 	}
 	
-	public static void cartMenu(Scanner scanner) {
+	public static void cartMenu(Scanner scanner) throws PlayerException {
 		boolean back = false;
 		while(!back) {
 
@@ -284,8 +316,111 @@ public class Aims {
 	public static void updateStoreMenu(Scanner scanner) {
 		boolean back = false;
 		while (!back) {
-			
+			System.out.println("Options: ");
+            System.out.println("--------------------------------");
+            System.out.println("1. Add a media");
+            System.out.println("2. Remove a media");
+            System.out.println("0. Back");
+            System.out.println("--------------------------------");
+            System.out.println("Please choose a number: 0-1-2");
+            int option = scanner.nextInt();
+            scanner.nextLine();
+            switch (option) {
+                case 0:
+                    back = true;
+                    break;
+                case 1:
+                    System.out.println("Enter the category of the media (1) Book, (2) CD, (3) DVD or (0) exit:");
+                    int categoryChoice = scanner.nextInt();
+                    scanner.nextLine();
+                    
+                    if (categoryChoice == 1) {
+                        System.out.println("Enter book title: ");
+                        String bookTitle = scanner.nextLine();
+                        System.out.println("Enter book category: ");
+                        String bookCategory = scanner.nextLine();
+                        System.out.println("Enter book cost: ");
+                        Float bookCost = scanner.nextFloat();
+                        scanner.nextLine();
+
+                        Book newBook = new Book(bookTitle, bookCategory, bookCost);
+                        store.addMedia(newBook);
+                    } else if (categoryChoice == 2) {
+                        System.out.println("Enter CD title: ");
+                        String cdTitle = scanner.nextLine();
+                        System.out.println("Enter CD category: ");
+                        String cdCategory = scanner.nextLine();
+                        System.out.println("Enter CD artist: ");
+                        String cdArtist = scanner.nextLine();
+                        System.out.println("Enter CD cost: ");
+                        Float cdCost = scanner.nextFloat();
+                        scanner.nextLine();
+
+                        CompactDisc newCD = new CompactDisc(cdTitle, cdCategory, cdArtist, cdCost);
+
+                        
+                        System.out.println("Do you want to add tracks to your CD? (1) Yes (0) No:");
+                        int addTrack = scanner.nextInt();
+                        scanner.nextLine();
+                        
+                        if (addTrack == 1) {
+                            System.out.println("How many tracks in your CD?");
+                            int numTrack = scanner.nextInt();
+                            scanner.nextLine();
+                            for (int i = 0; i < numTrack; i++) {
+                                System.out.println("Your " + (i+1) + " track: ");
+                                System.out.println("Enter track title: ");
+                                String trackTitle = scanner.nextLine();
+                                System.out.println("Enter track length: ");
+                                int trackLength = scanner.nextInt();
+                                scanner.nextLine();
+
+                                Track newTrack = new Track(trackTitle, trackLength);
+                                newCD.addTrack(newTrack);
+                            }
+                            store.addMedia(newCD);
+                        } else if (addTrack == 0) {
+                            store.addMedia(newCD);
+                        }
+                    } else if (categoryChoice == 3) {
+                        System.out.println("Enter DVD title: ");
+                        String dvdTitle = scanner.nextLine();
+                        System.out.println("Enter DVD category: ");
+                        String dvdCategory = scanner.nextLine();
+                        System.out.println("Enter book cost: ");
+                        Float dvdCost = scanner.nextFloat();
+                        scanner.nextLine();
+                        
+                        DigitalVideoDisc newDVD = new DigitalVideoDisc(dvdTitle, dvdCategory, dvdCost);
+                        store.addMedia(newDVD);                
+                    } else if (categoryChoice == 0) {
+                        break;
+                    } else {
+                        System.out.println("Invalid option!");
+                    }
+                    break;
+                case 2:
+                    boolean foundToRemove = false;
+                    while (!foundToRemove) {
+                        System.out.println("Enter the title of the media (type '#' to stop): ");
+                        String titleForRemove = scanner.nextLine();
+                        if (titleForRemove.equals("#")) {
+                            break;
+                        }
+                        Media media = store.search(titleForRemove);
+                        if (media != null) {
+                            store.removeMedia(media);
+                            foundToRemove = true;
+                        } else {
+                            System.out.println("Media not found!");
+                        }
+                    }
+                    break;
+                default:
+                    System.out.println("Invalid option, please choose wisely!");
+                    break;
+            }
 		}
-	}
 	
+	}
 }
